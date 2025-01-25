@@ -1,10 +1,20 @@
-for iface in $(ip -o link show | awk -F': ' '{print $2}'); do 
-    sudo ip link set dev $iface mtu 1450; 
-    if [[ -d /etc/netplan ]]; then 
-        sudo sed -i "/mtu:/d" /etc/netplan/*.yaml && echo "    mtu: 1450" | sudo tee -a /etc/netplan/*.yaml && sudo netplan apply; 
-    elif [[ -d /etc/sysconfig/network-scripts ]]; then 
-        sudo sed -i '/MTU/d' /etc/sysconfig/network-scripts/ifcfg-$iface && echo "MTU=1450" | sudo tee -a /etc/sysconfig/network-scripts/ifcfg-$iface && sudo systemctl restart network; 
-    elif [[ -f /etc/network/interfaces ]]; then 
-        sudo sed -i "/mtu/d" /etc/network/interfaces && echo "mtu 1450" | sudo tee -a /etc/network/interfaces && sudo systemctl restart networking; 
-    fi 
+#!/bin/bash
+
+# مقدار MTU جدید
+NEW_MTU=1400
+
+# دریافت لیست تمامی اینترفیس‌های شبکه
+interfaces=$(ls /sys/class/net)
+
+# تغییر مقدار MTU برای هر اینترفیس
+for iface in $interfaces; do
+    # بررسی اینکه اینترفیس فعال است یا خیر
+    if ip link show "$iface" > /dev/null 2>&1; then
+        echo "Setting MTU for interface $iface to $NEW_MTU"
+        sudo ip link set dev "$iface" mtu $NEW_MTU
+    else
+        echo "Interface $iface is not available. Skipping."
+    fi
 done
+
+echo "All MTUs have been updated to $NEW_MTU."
