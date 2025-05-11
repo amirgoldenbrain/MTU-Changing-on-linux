@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # مقدار MTU جدید
-NEW_MTU=1400
+NEW_MTU=1450
 
 # دریافت لیست تمامی اینترفیس‌های شبکه
 interfaces=$(ls /sys/class/net)
